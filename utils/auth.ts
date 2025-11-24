@@ -1,24 +1,44 @@
-import jwt from "jsonwebtoken";
+// utils/auth.ts
 import { NextRequest } from "next/server";
-import { User } from "@/models";
-import { IUserDocument } from "@/models/User";
+import jwt from "jsonwebtoken";
+import User from "@/models/User";
+import { logError } from "@/utils/logger";
 
-export function generateToken(user: IUserDocument) {
-  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+const JWT_SECRET = process.env.JWT_SECRET || "change_me";
+
+export function generateToken(user: { _id: any; role: string }) {
+  return jwt.sign({ id: String(user._id), role: user.role }, JWT_SECRET, { expiresIn: "7d" });
 }
 
 export async function getAuthUser(req: NextRequest) {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) throw new Error("No token");
-  const token = authHeader.split(" ")[1];
-  if (!token) throw new Error("No token");
-
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; role: string };
-  const user = await User.findById(decoded.id);
-  if (!user) throw new Error("User not found");
-  return user;
+  const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
+  if (!authHeader) {
+    const e = new Error("No token");
+    (e as any).code = 401; throw e;
+  }
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) {
+    const e = new Error("No token");
+    (e as any).code = 401; throw e;
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; role?: string };
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) {
+      const e = new Error("User not found");
+      (e as any).code = 401; throw e;
+    }
+    return user;
+  } catch (err) {
+    logError("getAuthUser failed", err);
+    const e = new Error("Invalid token");
+    (e as any).code = 401; throw e;
+  }
 }
 
-export function requireAdmin(user: { role: string }) {
-  if (user.role !== "admin") throw new Error("Admin access required");
+export function requireAdmin(user: any) {
+  if (!user || user.role !== "admin") {
+    const e = new Error("Admin access required");
+    (e as any).code = 403; throw e;
+  }
 }
