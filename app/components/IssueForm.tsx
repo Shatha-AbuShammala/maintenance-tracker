@@ -17,8 +17,11 @@ export type IssueFormValues = {
 
 type IssueFormProps = {
   initialValues?: Partial<IssueFormValues>;
-  onSuccessRedirect?: string;
+  issueId?: string;
+  mode?: "create" | "edit";
+  onSuccessRedirect?: string | null;
   submitLabel?: string;
+  onSuccess?: () => void;
 };
 
 type ApiResponse<T> = {
@@ -29,11 +32,22 @@ type ApiResponse<T> = {
 
 export default function IssueForm({
   initialValues,
-  onSuccessRedirect = "/",
-  submitLabel = "Create Issue",
+  issueId,
+  mode,
+  onSuccessRedirect,
+  submitLabel,
+  onSuccess,
 }: IssueFormProps) {
   const router = useRouter();
   const api = useApiFetcher();
+  const resolvedMode: "create" | "edit" = mode ?? (issueId ? "edit" : "create");
+  const resolvedSubmitLabel = submitLabel ?? (resolvedMode === "create" ? "Create Issue" : "Save Changes");
+  const redirectTarget =
+    onSuccessRedirect !== undefined
+      ? onSuccessRedirect
+      : resolvedMode === "create"
+      ? "/"
+      : null;
 
   const {
     register,
@@ -52,22 +66,30 @@ export default function IssueForm({
 
   const mutation = useMutation({
     mutationFn: async (data: IssueFormValues) => {
+      const url = resolvedMode === "edit" && issueId ? `/issues/${issueId}` : "/issues";
+      const method = resolvedMode === "edit" && issueId ? "PUT" : "POST";
+
       const response = await api<ApiResponse<Record<string, unknown>>>({
-        url: "/issues",
-        method: "POST",
+        url,
+        method,
         data,
       });
 
       if (!response.success) {
-        throw new Error(response.error || "Failed to create issue");
+        throw new Error(response.error || "Failed to save issue");
       }
 
       return response.data;
     },
     onSuccess: () => {
-      toast.success("Issue saved successfully");
-      reset();
-      router.push(onSuccessRedirect);
+      toast.success(resolvedMode === "create" ? "Issue created successfully" : "Issue updated successfully");
+      if (resolvedMode === "create") {
+        reset();
+      }
+      if (redirectTarget) {
+        router.push(redirectTarget);
+      }
+      onSuccess?.();
     },
     onError: (error: unknown) => {
       if (error instanceof Error) {
@@ -182,7 +204,7 @@ export default function IssueForm({
               Saving...
             </span>
           ) : (
-            submitLabel
+            resolvedSubmitLabel
           )}
         </button>
       </div>

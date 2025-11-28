@@ -28,7 +28,7 @@ export default function Navbar() {
             Home
           </Link>
           {user && (
-            <Link href="/issues/my" className={baseLinkClass}>
+            <Link href="/my-issues" className={baseLinkClass}>
               My Issues
             </Link>
           )}
@@ -89,7 +89,7 @@ export default function Navbar() {
             </Link>
             {user && (
               <Link
-                href="/issues/my"
+                href="/my-issues"
                 className="block text-sm font-medium text-gray-700 py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
