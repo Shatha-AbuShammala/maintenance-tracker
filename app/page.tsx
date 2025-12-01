@@ -1,5 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Layout from "@/app/components/Layout";
+import { useAuth } from "@/app/providers/Providers";
 
 const features = [
   { title: 'Easy Reporting', body: 'Submit issues in minutes with photos, details, and locations.', tone: 'text-amber-500', icon: '\u{1F4F8}' },
@@ -16,6 +22,25 @@ const steps = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/my-issues");
+    }
+  }, [user, router]);
+
+  if (user) {
+    return (
+      <Layout showFooter={false}>
+        <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-50 via-sky-50/60 to-white text-slate-900">
+          <p className="text-sm font-semibold text-slate-600">Redirecting to your issues…</p>
+        </main>
+      </Layout>
+    );
+  }
+
   return (
     <Layout showFooter={false}>
       <main className="relative min-h-screen bg-gradient-to-b from-slate-50 via-sky-50/60 to-white text-slate-900 overflow-hidden">

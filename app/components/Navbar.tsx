@@ -16,7 +16,6 @@ const VISITOR_LINKS: NavLink[] = [
 ];
 
 const CITIZEN_LINKS: NavLink[] = [
-  { href: "/", label: "Home" },
   { href: "/issues/new", label: "Report Issue" },
   { href: "/my-issues", label: "My Issues" },
 ];
@@ -159,8 +158,11 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const authProtectedPaths = ["/issues/new", "/my-issues"];
-
-  const navLinks = !user ? VISITOR_LINKS : user.role === "admin" ? ADMIN_LINKS : CITIZEN_LINKS;
+  const navLinks = !user
+    ? VISITOR_LINKS
+    : user.role === "admin"
+      ? ADMIN_LINKS
+      : CITIZEN_LINKS;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
