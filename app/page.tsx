@@ -1,428 +1,182 @@
-"use client";
+import Link from "next/link";
+import Layout from "@/app/components/Layout";
 
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import Layout from "./components/Layout";
-import LoadingSkeleton from "./components/LoadingSkeleton";
-import Pagination from "./components/Pagination";
-import { useApiFetcher } from "./providers/Providers";
-import { IssueStatus } from "@/models/Issue";
+const features = [
+  { title: 'Easy Reporting', body: 'Submit issues in minutes with photos, details, and locations.', tone: 'text-amber-500', icon: '\u{1F4F8}' },
+  { title: 'Track Progress', body: 'Know exactly where things stand with real-time status updates.', tone: 'text-sky-500', icon: '\u{1F501}' },
+  { title: 'Community Driven', body: 'Coordinate priorities with neighbors and keep everyone informed.', tone: 'text-emerald-500', icon: '\u{1F91D}' },
+  { title: 'Secure & Reliable', body: 'Privacy-first, with dependable uptime and audit-ready records.', tone: 'text-indigo-500', icon: '\u{1F512}' },
+];
 
-type Issue = {
-  _id: string;
-  title: string;
-  description: string;
-  area: string;
-  status: IssueStatus;
-  createdAt?: string;
-  updatedAt?: string;
-};
+const steps = [
+  { title: 'Capture', detail: 'Residents submit with photos, categories, and precise locations.' },
+  { title: 'Route', detail: 'Smart routing sends tickets to the right crew automatically.' },
+  { title: 'Communicate', detail: 'Status changes trigger respectful, timely notifications.' },
+  { title: 'Measure', detail: 'Dashboards surface trends so you can prevent repeat issues.' },
+];
 
-type IssuesResponse = {
-  meta: { total: number; page: number; limit: number; pages: number };
-  items: Issue[];
-};
-
-type Filters = {
-  status: IssueStatus | "All";
-  area: string;
-  search: string;
-};
-
-const PAGE_SIZE = 10;
-
-/**
- * StatsCard component displays a single statistic with label and value
- */
-function StatsCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: "blue" | "yellow" | "purple" | "green";
-}) {
-  const colorClasses = {
-    blue: "bg-blue-50 text-blue-700 border-blue-200",
-    yellow: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    purple: "bg-purple-50 text-purple-700 border-purple-200",
-    green: "bg-green-50 text-green-700 border-green-200",
-  };
-
-  return (
-    <div className={`rounded-xl border p-5 shadow-sm ${colorClasses[color]}`}>
-      <div className="text-xs font-semibold uppercase tracking-wide opacity-80 mb-1">
-        {label}
-      </div>
-      <div className="text-3xl font-bold">{value}</div>
-    </div>
-  );
-}
-
-/**
- * DashboardStats displays 4 stat cards: Total Issues, Pending, InProgress, Completed
- * 
- * APPROACH FOR FETCHING COUNTS:
- * The API endpoint GET /api/issues returns meta.total for the total count, but does not
- * provide aggregated counts per status in the response.
- * 
- * Therefore, we implement client-side counting:
- * 1. Call GET /api/issues?limit=100 to fetch the first 100 issues (or all if fewer exist)
- * 2. Use meta.total from the response for the "Total Issues" count (this is accurate)
- * 3. Compute Pending/InProgress/Completed counts by filtering the fetched items array
- *    on the client side
- * 
- * Note: If there are more than 100 issues, the status breakdown counts will be
- * approximate based on the first 100 items. This is acceptable for dashboard purposes.
- * For exact counts across all issues, the API would need to support aggregation endpoints
- * or return status counts in the meta object.
- */
-function DashboardStats({
-  stats,
-  isLoading,
-  isError,
-}: {
-  stats?: IssuesResponse;
-  isLoading: boolean;
-  isError: boolean;
-}) {
-  const counts = useMemo(() => {
-    if (!stats) {
-      return { total: 0, pending: 0, inProgress: 0, completed: 0 };
-    }
-
-    // Client-side count: filter items array by status
-    const pending = stats.items.filter((issue) => issue.status === "Pending").length;
-    const inProgress = stats.items.filter((issue) => issue.status === "InProgress").length;
-    const completed = stats.items.filter((issue) => issue.status === "Completed").length;
-
-    return {
-      total: stats.meta.total, // Use API's meta.total (accurate even if >100 issues)
-      pending,
-      inProgress,
-      completed,
-    };
-  }, [stats]);
-
-  if (isError) {
-    return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-        Failed to load statistics. Please refresh the page.
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-24 w-full animate-pulse rounded-xl bg-gray-100" />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <StatsCard label="Total Issues" value={counts.total} color="blue" />
-      <StatsCard label="Pending" value={counts.pending} color="yellow" />
-      <StatsCard label="In Progress" value={counts.inProgress} color="purple" />
-      <StatsCard label="Completed" value={counts.completed} color="green" />
-    </div>
-  );
-}
-
-/**
- * IssueFilters component provides filtering by status, area, and search
- */
-function IssueFilters({
-  filters,
-  onChange,
-}: {
-  filters: Filters;
-  onChange: (next: Filters) => void;
-}) {
-  const setField = <K extends keyof Filters>(key: K, value: Filters[K]) => {
-    onChange({ ...filters, [key]: value });
-  };
-
-  return (
-    <div className="rounded-xl border bg-white p-4 shadow-sm">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-          <div className="flex-1 md:flex-initial">
-            <label htmlFor="filter-status" className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              id="filter-status"
-              value={filters.status}
-              onChange={(e) => setField("status", e.target.value as Filters["status"])}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-            >
-              <option value="All">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="InProgress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-
-          <div className="flex-1 md:flex-initial">
-            <label htmlFor="filter-area" className="block text-sm font-medium text-gray-700 mb-1">
-              Area
-            </label>
-            <input
-              id="filter-area"
-              type="text"
-              value={filters.area}
-              onChange={(e) => setField("area", e.target.value)}
-              placeholder="Filter by area"
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 md:max-w-sm">
-          <label htmlFor="filter-search" className="block text-sm font-medium text-gray-700 mb-1">
-            Search
-          </label>
-          <input
-            id="filter-search"
-            type="text"
-            value={filters.search}
-            onChange={(e) => setField("search", e.target.value)}
-            placeholder="Search by title or description"
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * IssueRow component renders a single issue in card format
- */
-function IssueRow({ issue }: { issue: Issue }) {
-  const statusColors = {
-    Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    InProgress: "bg-blue-100 text-blue-800 border-blue-200",
-    Completed: "bg-green-100 text-green-800 border-green-200",
-  };
-
-  const statusLabel = issue.status === "InProgress" ? "In Progress" : issue.status;
-
-  return (
-    <div className="rounded-lg border bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-gray-900 line-clamp-1 mb-1">
-            {issue.title}
-          </h3>
-          <p className="text-sm text-gray-600 line-clamp-2 mb-2">{issue.description}</p>
-          <div className="flex items-center gap-4 text-xs text-gray-500">
-            <span className="font-medium">Area: {issue.area}</span>
-            {issue.createdAt && (
-              <span>Created: {new Date(issue.createdAt).toLocaleDateString()}</span>
-            )}
-          </div>
-        </div>
-        <span
-          className={`flex-shrink-0 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border ${statusColors[issue.status]}`}
-        >
-          {statusLabel}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/**
- * IssuesList component renders the list of issues with loading, error, and empty states
- * Supports pagination with Previous/Next buttons
- */
-function IssuesList({
-  data,
-  isLoading,
-  isError,
-  page,
-  onPageChange,
-}: {
-  data?: IssuesResponse;
-  isLoading: boolean;
-  isError: boolean;
-  page: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (isLoading) {
-    return <LoadingSkeleton variant="table" count={5} />;
-  }
-
-  if (isError) {
-    return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-        <p className="text-sm font-medium text-red-700 mb-1">Failed to load issues</p>
-        <p className="text-xs text-red-600">Please try refreshing the page.</p>
-      </div>
-    );
-  }
-
-  if (!data || data.items.length === 0) {
-    return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-        <p className="text-sm font-medium text-gray-700 mb-1">No issues found</p>
-        <p className="text-xs text-gray-500">
-          {data?.meta.total === 0
-            ? "Get started by creating your first issue."
-            : "Try adjusting your filters to see more results."}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="space-y-3">
-        {data.items.map((issue) => (
-          <IssueRow key={issue._id} issue={issue} />
-        ))}
-      </div>
-
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-gray-500">
-        <span>
-          Showing {(data.meta.page - 1) * data.meta.limit + 1} to{" "}
-          {Math.min(data.meta.page * data.meta.limit, data.meta.total)} of {data.meta.total}{" "}
-          issues
-        </span>
-        <Pagination
-          currentPage={page}
-          totalPages={data.meta.pages || 1}
-          onPageChange={onPageChange}
-        />
-      </div>
-    </div>
-  );
-}
-
-/**
- * Home / Dashboard page
- * 
- * Features:
- * - Stats overview: 4 cards showing Total Issues, Pending, InProgress, Completed
- * - Filters: Status dropdown, Area input, Search box
- * - Issues list: Paginated list with IssueRow cards
- * - React Query: Data fetching with automatic caching and refetching
- * - Loading states: Skeleton loaders during data fetch
- * - Responsive layout: Desktop (grid) and mobile (stacked vertically)
- * - Error & empty states: Clear messaging for failed loads and no results
- */
 export default function Home() {
-  const api = useApiFetcher();
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<Filters>({
-    status: "All",
-    area: "",
-    search: "",
-  });
-
-  // Main issues query with filters and pagination
-  const issuesQuery = useQuery<IssuesResponse>({
-    queryKey: ["issues", { page, filters }],
-    queryFn: async () => {
-      const params: Record<string, string> = {
-        page: String(page),
-        limit: String(PAGE_SIZE),
-      };
-
-      if (filters.status !== "All") {
-        params.status = filters.status;
-      }
-      if (filters.area.trim()) {
-        params.area = filters.area.trim();
-      }
-      if (filters.search.trim()) {
-        params.search = filters.search.trim();
-      }
-
-      const response = await api<{ success: boolean; data: IssuesResponse }>({
-        url: "/issues",
-        method: "GET",
-        params,
-      });
-
-      if (!response.success || !response.data) {
-        throw new Error("Failed to load issues");
-      }
-      return response.data;
-    },
-  });
-
-  // Stats query: Fetch first 100 issues to compute status counts client-side
-  // See DashboardStats component comments for detailed approach explanation
-  const statsQuery = useQuery<IssuesResponse>({
-    queryKey: ["issues-stats"],
-    queryFn: async () => {
-      const response = await api<{ success: boolean; data: IssuesResponse }>({
-        url: "/issues",
-        method: "GET",
-        params: {
-          page: "1",
-          limit: "100", // Fetch up to 100 issues for client-side status counting
-        },
-      });
-
-      if (!response.success || !response.data) {
-        throw new Error("Failed to load statistics");
-      }
-      return response.data;
-    },
-  });
-
   return (
-    <Layout>
-      <main className="min-h-screen bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Overview of your reported issues and their current status.
+    <Layout showFooter={false}>
+      <main className="relative min-h-screen bg-gradient-to-b from-slate-50 via-sky-50/60 to-white text-slate-900 overflow-hidden">
+        <div className="pointer-events-none absolute -left-32 -top-32 h-72 w-72 rounded-full bg-gradient-to-r from-sky-200 via-cyan-100 to-emerald-100 blur-3xl" />
+
+        <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="mx-auto flex max-w-5xl flex-col items-center px-6 pb-20 pt-16 text-center lg:pt-24">
+            <p className="mb-4 inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 ring-1 ring-white/10">
+              City service made simple
             </p>
-            {issuesQuery.isFetching && !issuesQuery.isLoading && (
-              <p className="mt-2 text-xs text-gray-500">Refreshing data...</p>
-            )}
+            <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
+              A clear, calm way to stay on top of maintenance updates.
+            </h1>
+            <p className="mt-6 max-w-3xl text-lg text-slate-200">
+              Log in to check progress, get notified when work is complete, and know your community is cared for around the clock.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <Link
+                href="/auth/login"
+                className="rounded-full bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-300/20 transition hover:-translate-y-0.5 hover:shadow-xl"
+              >
+                Report an issue
+              </Link>
+            </div>
+            <div className="mt-12 grid w-full max-w-3xl gap-4 text-sm text-slate-200 sm:grid-cols-3">
+              <div className="rounded-2xl bg-white/5 p-4 shadow-lg shadow-slate-900/20 ring-1 ring-white/10">
+                <p className="text-3xl font-semibold text-white">24/7</p>
+                <p className="mt-1">Resident-friendly submissions on any device</p>
+              </div>
+              <div className="rounded-2xl bg-white/5 p-4 shadow-lg shadow-slate-900/20 ring-1 ring-white/10">
+                <p className="text-3xl font-semibold text-white">48h</p>
+                <p className="mt-1">Average acknowledgment time for new reports</p>
+              </div>
+              <div className="rounded-2xl bg-white/5 p-4 shadow-lg shadow-slate-900/20 ring-1 ring-white/10">
+                <p className="text-3xl font-semibold text-white">99.9%</p>
+                <p className="mt-1">Uptime for status updates and notifications</p>
+              </div>
+            </div>
           </div>
+        </section>
 
-          {/* Stats Cards - Desktop: 4 column grid, Mobile: stacked */}
-          <div className="mb-6">
-            <DashboardStats
-              stats={statsQuery.data}
-              isLoading={statsQuery.isLoading}
-              isError={statsQuery.isError}
-            />
+        <section className="py-16">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">What you get</p>
+              <h3 className="mt-3 text-4xl font-semibold text-slate-900">Core Features</h3>
+              <p className="mt-3 text-base text-slate-600">
+                A professional toolkit built for clarity, accountability, and trusted communication.
+              </p>
+            </div>
+            <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+              {features.map((item) => (
+                <div
+                  key={item.title}
+                  className="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-xl shadow-slate-200/50 ring-1 ring-slate-200 transition hover:-translate-y-2 hover:shadow-2xl hover:ring-sky-100"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-sky-50 opacity-0 transition group-hover:opacity-100" />
+                  <div className={`relative mb-4 text-5xl ${item.tone}`}>{item.icon}</div>
+                  <h4 className="relative text-2xl font-semibold text-slate-900">{item.title}</h4>
+                  <p className="relative mt-3 text-sm text-slate-600">{item.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
 
-          {/* Filters */}
-          <div className="mb-6">
-            <IssueFilters
-              filters={filters}
-              onChange={(next) => {
-                setPage(1); // Reset to page 1 when filters change
-                setFilters(next);
-              }}
-            />
+        <section id="how-it-works" className="mx-auto max-w-6xl px-6 py-14">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">How it works</p>
+              <h2 className="mt-3 text-3xl font-semibold text-slate-900">
+                From report to resolution with nothing falling through the cracks.
+              </h2>
+              <p className="mt-4 text-slate-600">
+                Every touchpoint is designed to keep both residents and teams confident. Fewer surprises, faster closes, and a record everyone
+                can trust.
+              </p>
+            </div>
+            <div className="grid gap-4">
+              {steps.map((step, index) => (
+                <div
+                  key={step.title}
+                  className="flex items-start space-x-4 rounded-2xl bg-white p-5 shadow-sm shadow-slate-200 ring-1 ring-slate-200/80"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 text-sm font-semibold text-white shadow-inner">
+                    {String(index + 1).padStart(2, '0')}
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-slate-900">{step.title}</p>
+                    <p className="text-sm text-slate-600">{step.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
 
-          {/* Issues List */}
-          <IssuesList
-            data={issuesQuery.data}
-            isLoading={issuesQuery.isLoading}
-            isError={issuesQuery.isError}
-            page={page}
-            onPageChange={setPage}
-          />
-        </div>
+        <footer className="bg-slate-950 text-white">
+          <div className="mx-auto max-w-6xl px-6 py-14">
+            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <h3 className="text-xl font-semibold">Contact Us</h3>
+                <p className="mt-4 text-sm text-slate-300">Have questions or need assistance? Reach out anytime.</p>
+                <p className="mt-2 text-sm text-slate-400">Email: support@cityops.com</p>
+                <p className="text-sm text-slate-400">Phone: +1 (123) 456-7890</p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold">Quick Links</h3>
+                <ul className="mt-4 space-y-2 text-sm text-slate-300">
+                  <li>
+                    <Link href="/about" className="hover:text-white">
+                      About Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/privacy-policy" className="hover:text-white">
+                      Privacy Policy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/terms" className="hover:text-white">
+                      Terms of Service
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold">Follow Us</h3>
+                <div className="mt-4 flex space-x-4 text-lg text-slate-300">
+                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    Facebook
+                  </a>
+                  <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    Twitter
+                  </a>
+                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    LinkedIn
+                  </a>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold">Newsletter</h3>
+                <p className="mt-4 text-sm text-slate-300">Stay updated with the latest news and updates.</p>
+                <div className="mt-4 space-y-2">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="w-full rounded-lg border border-slate-800 bg-slate-900/50 p-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  />
+                  <button className="w-full rounded-lg bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:shadow-xl">
+                    Subscribe
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="mt-10 border-t border-white/10 pt-6 text-center text-sm text-slate-400">
+              <p>&copy; 2025 City Ops. All rights reserved.</p>
+            </div>
+          </div>
+        </footer>
       </main>
     </Layout>
   );
