@@ -41,10 +41,18 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     else localStorage.removeItem("token");
   }, []);
 
+  const setUserWithPersist = useCallback((value: User | null) => {
+    setUser(value);
+    if (typeof window === "undefined") return;
+
+    if (value) localStorage.setItem("user", JSON.stringify(value));
+    else localStorage.removeItem("user");
+  }, []);
+
   const logout = useCallback(() => {
-    setUser(null);
+    setUserWithPersist(null);
     setToken(null);
-  }, [setToken]);
+  }, [setToken, setUserWithPersist]);
 
   const fetchCurrentUser = useCallback(
     async (authToken: string) => {
@@ -61,17 +69,27 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
           role: data.role,
         };
 
-        setUser(mappedUser);
+        setUserWithPersist(mappedUser);
       } catch {
         logout();
       }
     },
-    [logout]
+    [logout, setUserWithPersist]
   );
 
   useEffect(() => {
     const init = async () => {
       const storedToken = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          // ignore parse errors
+        }
+      }
+
       if (!storedToken) return;
       setTokenState(storedToken);
       await fetchCurrentUser(storedToken);
@@ -83,7 +101,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       user,
       token,
-      setUser,
+      setUser: setUserWithPersist,
       setToken,
       logout,
     }),

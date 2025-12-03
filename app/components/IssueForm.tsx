@@ -12,6 +12,7 @@ export type IssueFormValues = {
   description: string;
   type: string;
   area: string;
+  detailedAddress?: string;
   image?: string;
 };
 
@@ -22,6 +23,8 @@ type IssueFormProps = {
   onSuccessRedirect?: string | null;
   submitLabel?: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
+  cancelLabel?: string;
 };
 
 type ApiResponse<T> = {
@@ -37,6 +40,8 @@ export default function IssueForm({
   onSuccessRedirect,
   submitLabel,
   onSuccess,
+  onCancel,
+  cancelLabel,
 }: IssueFormProps) {
   const router = useRouter();
   const api = useApiFetcher();
@@ -52,7 +57,7 @@ export default function IssueForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     reset,
   } = useForm<IssueFormValues>({
     defaultValues: {
@@ -60,6 +65,7 @@ export default function IssueForm({
       description: initialValues?.description ?? "",
       type: initialValues?.type ?? "",
       area: initialValues?.area ?? "",
+      detailedAddress: initialValues?.detailedAddress ?? "",
       image: initialValues?.image ?? "",
     },
   });
@@ -100,74 +106,110 @@ export default function IssueForm({
     },
   });
 
-  const onSubmit = (data: IssueFormValues) => mutation.mutate(data);
+  const onSubmit = (data: IssueFormValues) => {
+    if (!isDirty) return;
+    const { detailedAddress, ...rest } = data;
+    const descriptionWithAddress =
+      detailedAddress && detailedAddress.trim()
+        ? `${rest.description}\n\nAddress: ${detailedAddress.trim()}`
+        : rest.description;
+
+    mutation.mutate({
+      ...rest,
+      description: descriptionWithAddress,
+    });
+  };
 
   return (
-    <form
-      className="space-y-6"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <div className="grid gap-4">
+    <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid gap-5">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="title" className="block text-base font-semibold text-slate-800 mb-2">
             Title
           </label>
           <input
             id="title"
             type="text"
             {...register("title", { required: "Title is required", minLength: { value: 3, message: "Title must be at least 3 characters" } })}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-            placeholder="e.g., Broken streetlight near Elm St."
+            className="w-full rounded-md border border-slate-200 bg-white text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-500 text-base px-4 py-3"
+            placeholder="Enter the issue title"
           />
-          {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
+          {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-base font-semibold text-slate-800 mb-2">
             Description
           </label>
           <textarea
             id="description"
             rows={4}
             {...register("description", { required: "Description is required", minLength: { value: 6, message: "Description must be at least 6 characters" } })}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-            placeholder="Describe the issue in detail..."
+            className="w-full rounded-md border border-slate-200 bg-white text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-500 text-base px-4 py-3"
+            placeholder="Describe the issue in detail (what, where, impact)"
           />
-          {errors.description && <p className="text-xs text-red-600 mt-1">{errors.description.message}</p>}
+          {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5">
           <div>
-            <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="type" className="block text-base font-semibold text-slate-800 mb-2">
               Type
             </label>
-            <input
+            <select
               id="type"
-              type="text"
-              {...register("type", { required: "Type is required", minLength: { value: 2, message: "Type must be at least 2 characters" } })}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-              placeholder="e.g., Lighting"
-            />
-            {errors.type && <p className="text-xs text-red-600 mt-1">{errors.type.message}</p>}
+              {...register("type", { required: "Type is required" })}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 text-base px-4 py-3 transition hover:border-slate-300"
+            >
+              <option value="">Select issue type</option>
+              <option value="Lighting">Lighting</option>
+              <option value="Infrastructure">Infrastructure</option>
+              <option value="Water & Sewage">Water & Sewage</option>
+              <option value="Waste">Waste</option>
+              <option value="Buildings">Buildings</option>
+              <option value="Parks & Green Spaces">Parks & Green Spaces</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Security & Safety">Security & Safety</option>
+            </select>
+            {errors.type && <p className="text-xs text-red-500 mt-1">{errors.type.message}</p>}
           </div>
 
           <div>
-            <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="area" className="block text-base font-semibold text-slate-800 mb-2">
               Area
             </label>
-            <input
+            <select
               id="area"
-              type="text"
               {...register("area", { required: "Area is required" })}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-              placeholder="e.g., Elm Street"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 text-base px-4 py-3 transition hover:border-slate-300"
+            >
+              <option value="">Select area</option>
+              <option value="Gaza">Gaza</option>
+              <option value="Khan Younis">Khan Younis</option>
+              <option value="Deir al-Balah">Deir al-Balah</option>
+              <option value="Rafah">Rafah</option>
+              <option value="North Gaza">North Gaza</option>
+              <option value="Middle Gaza">Middle Gaza</option>
+            </select>
+            {errors.area && <p className="text-xs text-red-500 mt-1">{errors.area.message}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="detailedAddress" className="block text-base font-semibold text-slate-800 mb-2">
+              Detailed address
+            </label>
+            <textarea
+              id="detailedAddress"
+              rows={2}
+              {...register("detailedAddress")}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 text-base px-4 py-3 transition hover:border-slate-300"
+              placeholder="Street name, nearby landmarks, building number…"
             />
-            {errors.area && <p className="text-xs text-red-600 mt-1">{errors.area.message}</p>}
           </div>
         </div>
 
         <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="image" className="block text-base font-semibold text-slate-800 mb-2">
             Image URL (optional)
           </label>
           <input
@@ -179,36 +221,46 @@ export default function IssueForm({
                 message: "Please enter a valid URL",
               },
             })}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-            placeholder="https://example.com/photo.jpg"
+            className="w-full rounded-md border border-slate-200 bg-white text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-500 text-base px-4 py-3"
+            placeholder="Paste an image link (optional)"
           />
-          {errors.image && <p className="text-xs text-red-600 mt-1">{errors.image.message}</p>}
+          {errors.image && <p className="text-xs text-red-500 mt-1">{errors.image.message}</p>}
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {mutation.isError && (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-red-400">
             {(mutation.error as Error)?.message || "An unknown error occurred."}
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {mutation.isPending ? (
-            <span className="flex items-center gap-2">
-              <LoadingSkeleton count={1} variant="card" className="h-5 w-5 bg-white/30" />
-              Saving...
-            </span>
-          ) : (
-            resolvedSubmitLabel
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50"
+            >
+              {cancelLabel ?? "Cancel"}
+            </button>
           )}
-        </button>
+          <button
+            type="submit"
+            disabled={!isDirty || mutation.isPending}
+            className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-blue-700 via-indigo-600 to-fuchsia-600 px-6 py-3 text-base font-semibold text-white shadow-[0_16px_45px_-18px_rgba(59,130,246,0.65)] hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-16px_rgba(99,102,241,0.55)] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {mutation.isPending ? (
+              <span className="flex items-center gap-2">
+                <LoadingSkeleton count={1} variant="card" className="h-5 w-5 bg-white/30" />
+                Saving...
+              </span>
+            ) : (
+              resolvedSubmitLabel
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );
 }
-

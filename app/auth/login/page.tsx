@@ -62,7 +62,7 @@ export default function LoginPage() {
   const onSubmit = (data: LoginFormData) => loginMutation.mutate(data);
 
   return (
-    <Layout showFooter={false}>
+    <Layout>
       <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-blue-900 text-slate-50">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.1),transparent_32%),radial-gradient(circle_at_80%_0%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_10%_80%,rgba(14,165,233,0.08),transparent_35%)]" />
         <div className="pointer-events-none absolute -left-16 top-28 h-48 w-48 rounded-full bg-gradient-to-br from-cyan-400/20 to-indigo-500/20 blur-2xl animate-pulse" />

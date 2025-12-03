@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect } from "react";
@@ -8,17 +7,17 @@ import Layout from "@/app/components/Layout";
 import { useAuth } from "@/app/providers/Providers";
 
 const features = [
-  { title: 'Easy Reporting', body: 'Submit issues in minutes with photos, details, and locations.', tone: 'text-amber-500', icon: '\u{1F4F8}' },
-  { title: 'Track Progress', body: 'Know exactly where things stand with real-time status updates.', tone: 'text-sky-500', icon: '\u{1F501}' },
-  { title: 'Community Driven', body: 'Coordinate priorities with neighbors and keep everyone informed.', tone: 'text-emerald-500', icon: '\u{1F91D}' },
-  { title: 'Secure & Reliable', body: 'Privacy-first, with dependable uptime and audit-ready records.', tone: 'text-indigo-500', icon: '\u{1F512}' },
+  { title: "Easy Reporting", body: "Submit issues in minutes with photos, details, and locations.", tone: "text-amber-500", icon: "\u{1F4F8}" },
+  { title: "Track Progress", body: "Know exactly where things stand with real-time status updates.", tone: "text-sky-500", icon: "\u{1F501}" },
+  { title: "Community Driven", body: "Coordinate priorities with neighbors and keep everyone informed.", tone: "text-emerald-500", icon: "\u{1F91D}" },
+  { title: "Secure & Reliable", body: "Privacy-first, with dependable uptime and audit-ready records.", tone: "text-indigo-500", icon: "\u{1F512}" },
 ];
 
 const steps = [
-  { title: 'Capture', detail: 'Residents submit with photos, categories, and precise locations.' },
-  { title: 'Route', detail: 'Smart routing sends tickets to the right crew automatically.' },
-  { title: 'Communicate', detail: 'Status changes trigger respectful, timely notifications.' },
-  { title: 'Measure', detail: 'Dashboards surface trends so you can prevent repeat issues.' },
+  { title: "Capture", detail: "Residents submit with photos, categories, and precise locations." },
+  { title: "Route", detail: "Smart routing sends tickets to the right crew automatically." },
+  { title: "Communicate", detail: "Status changes trigger respectful, timely notifications." },
+  { title: "Measure", detail: "Dashboards surface trends so you can prevent repeat issues." },
 ];
 
 export default function Home() {
@@ -31,18 +30,8 @@ export default function Home() {
     }
   }, [user, router]);
 
-  if (user) {
-    return (
-      <Layout showFooter={false}>
-        <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-50 via-sky-50/60 to-white text-slate-900">
-          <p className="text-sm font-semibold text-slate-600">Redirecting to your issues…</p>
-        </main>
-      </Layout>
-    );
-  }
-
   return (
-    <Layout showFooter={false}>
+    <Layout>
       <main className="relative min-h-screen bg-gradient-to-b from-slate-50 via-sky-50/60 to-white text-slate-900 overflow-hidden">
         <div className="pointer-events-none absolute -left-32 -top-32 h-72 w-72 rounded-full bg-gradient-to-r from-sky-200 via-cyan-100 to-emerald-100 blur-3xl" />
 
@@ -116,8 +105,7 @@ export default function Home() {
                 From report to resolution with nothing falling through the cracks.
               </h2>
               <p className="mt-4 text-slate-600">
-                Every touchpoint is designed to keep both residents and teams confident. Fewer surprises, faster closes, and a record everyone
-                can trust.
+                Every touchpoint is designed to keep both residents and teams confident. Fewer surprises, faster closes, and a record everyone can trust.
               </p>
             </div>
             <div className="grid gap-4">
@@ -127,7 +115,7 @@ export default function Home() {
                   className="flex items-start space-x-4 rounded-2xl bg-white p-5 shadow-sm shadow-slate-200 ring-1 ring-slate-200/80"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 text-sm font-semibold text-white shadow-inner">
-                    {String(index + 1).padStart(2, '0')}
+                    {String(index + 1).padStart(2, "0")}
                   </div>
                   <div>
                     <p className="text-base font-semibold text-slate-900">{step.title}</p>
@@ -138,70 +126,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        <footer className="bg-slate-950 text-white">
-          <div className="mx-auto max-w-6xl px-6 py-14">
-            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <h3 className="text-xl font-semibold">Contact Us</h3>
-                <p className="mt-4 text-sm text-slate-300">Have questions or need assistance? Reach out anytime.</p>
-                <p className="mt-2 text-sm text-slate-400">Email: support@cityops.com</p>
-                <p className="text-sm text-slate-400">Phone: +1 (123) 456-7890</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold">Quick Links</h3>
-                <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                  <li>
-                    <Link href="/about" className="hover:text-white">
-                      About Us
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/privacy-policy" className="hover:text-white">
-                      Privacy Policy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/terms" className="hover:text-white">
-                      Terms of Service
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold">Follow Us</h3>
-                <div className="mt-4 flex space-x-4 text-lg text-slate-300">
-                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                    Facebook
-                  </a>
-                  <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                    Twitter
-                  </a>
-                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                    LinkedIn
-                  </a>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold">Newsletter</h3>
-                <p className="mt-4 text-sm text-slate-300">Stay updated with the latest news and updates.</p>
-                <div className="mt-4 space-y-2">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="w-full rounded-lg border border-slate-800 bg-slate-900/50 p-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                  />
-                  <button className="w-full rounded-lg bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:shadow-xl">
-                    Subscribe
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="mt-10 border-t border-white/10 pt-6 text-center text-sm text-slate-400">
-              <p>&copy; 2025 City Ops. All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
       </main>
     </Layout>
   );

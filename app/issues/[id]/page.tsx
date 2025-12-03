@@ -62,6 +62,20 @@ export default function IssueDetailPage() {
   const issue = issueQuery.data;
   const isAdmin = user?.role === "admin";
   const isReporter = issue && issue.createdBy?._id === user?.id;
+  const history = useMemo(() => {
+    if (!issue) return [];
+    const events: { label: string; detail: string }[] = [];
+    if (issue.createdAt) {
+      events.push({ label: "Created", detail: new Date(issue.createdAt).toLocaleString() });
+    }
+    if (issue.updatedAt && issue.updatedAt !== issue.createdAt) {
+      events.push({ label: "Last updated", detail: new Date(issue.updatedAt).toLocaleString() });
+    }
+    if (events.length === 0) {
+      events.push({ label: "Timeline", detail: "No history available yet." });
+    }
+    return events;
+  }, [issue]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async (status: IssueStatus) => {
@@ -290,6 +304,18 @@ export default function IssueDetailPage() {
                     </div>
                   </div>
                 )}
+              </section>
+
+              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Activity</h2>
+                <div className="space-y-3 text-sm text-gray-700">
+                  {history.map((item) => (
+                    <div key={item.label} className="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2">
+                      <span className="font-semibold text-slate-800">{item.label}</span>
+                      <span className="text-xs text-slate-500">{item.detail}</span>
+                    </div>
+                  ))}
+                </div>
               </section>
             </aside>
           </div>
