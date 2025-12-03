@@ -206,7 +206,14 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center space-x-3" onClick={() => setIsOpen(false)}>
+        <Link
+          href="/"
+          className="flex items-center space-x-3"
+          onClick={(event) => {
+            event.preventDefault();
+            setIsOpen(false);
+          }}
+        >
           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-sky-500 via-cyan-400 to-emerald-400 shadow-lg shadow-sky-200" />
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">City Ops</p>
