@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import Layout from "@/app/components/Layout";
@@ -36,7 +36,6 @@ const STATUS_OPTIONS: IssueStatus[] = ["Pending", "InProgress", "Completed"];
 
 export default function IssueDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
   const api = useApiFetcher();
   const { user } = useAuth();
 

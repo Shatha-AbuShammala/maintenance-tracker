@@ -6,18 +6,23 @@ import { getAuthUser, requireAdmin } from "@/utils/auth";
 import { badRequest, unauthorized, forbidden, notFound, serverError } from "@/utils/response";
 import { logError } from "@/utils/logger";
 
-type Params = { params: { id?: string } };
+async function resolveParams(maybeParams: any) {
+  if (maybeParams && typeof maybeParams.then === "function") {
+    return await maybeParams;
+  }
+  return maybeParams;
+}
 
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function DELETE(req: NextRequest, context: any) {
   try {
     await connectDb();
     const authUser = await getAuthUser(req);
     requireAdmin(authUser);
 
     const url = new URL(req.url);
-    const paramId = params?.id;
-    const pathId = url.pathname.split("/").filter(Boolean).pop();
-    const userId = paramId || pathId;
+    const params = await resolveParams(context?.params);
+    const rawId = params?.id ?? url.pathname.split("/").filter(Boolean).pop();
+    const userId = typeof rawId === "string" ? rawId.trim() : String(rawId || "").trim();
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return badRequest("Invalid user id");
