@@ -17,17 +17,17 @@ export default function Footer() {
             <h3 className="text-xl font-semibold">Quick Links</h3>
             <ul className="mt-4 space-y-2 text-sm text-slate-300">
               <li>
-                <Link href="/about" className="hover:text-white">
+                <Link href="/about" className="hover:text-white cursor-pointer">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/privacy-policy" className="hover:text-white">
+                <Link href="/privacy-policy" className="hover:text-white cursor-pointer">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-white">
+                <Link href="/terms" className="hover:text-white cursor-pointer">
                   Terms of Service
                 </Link>
               </li>
@@ -36,13 +36,13 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-semibold">Follow Us</h3>
             <div className="mt-4 flex space-x-4 text-lg text-slate-300">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white cursor-pointer">
                 Facebook
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white cursor-pointer">
                 Twitter
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white cursor-pointer">
                 LinkedIn
               </a>
             </div>
@@ -56,7 +56,7 @@ export default function Footer() {
                 placeholder="Enter your email"
                 className="w-full rounded-lg border border-slate-800 bg-slate-900/50 p-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
               />
-              <button className="w-full rounded-lg bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:shadow-xl">
+              <button className="w-full rounded-lg bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:shadow-xl cursor-pointer">
                 Subscribe
               </button>
             </div>

@@ -14,6 +14,7 @@ export type IssueCardData = {
   title: string;
   description: string;
   area: string;
+  address?: string;
   status: IssueStatus;
   createdBy?: IssueReporter | string | null;
   createdAt?: string;
@@ -57,7 +58,7 @@ export default function IssueCard({ issue, icon }: IssueCardProps) {
   return (
     <Link
       href={`/issues/${issue._id}`}
-      className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
     >
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0">

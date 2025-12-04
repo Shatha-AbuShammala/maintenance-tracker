@@ -8,8 +8,9 @@ export interface IIssueDocument extends Document {
   type: string;
   area: string;
   image?: string;
+  address?: string;
   status: IssueStatus;
-  createdBy?: string;
+  createdBy?: mongoose.Types.ObjectId | string;
 }
 
 const IssueSchema = new Schema<IIssueDocument>({
@@ -18,8 +19,9 @@ const IssueSchema = new Schema<IIssueDocument>({
   type: { type: String, required: true },
   area: { type: String, required: true },
   image: { type: String },
+  address: { type: String },
   status: { type: String, enum: ["Pending","InProgress","Completed"], default: "Pending" },
-  createdBy: { type: String, required: false },
+  createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
 }, { timestamps: true });
 
 export default mongoose.models.Issue || mongoose.model<IIssueDocument>("Issue", IssueSchema);

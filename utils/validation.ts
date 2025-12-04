@@ -20,6 +20,7 @@ export const createIssueSchema = z.object({
   type: z.string().min(2),
   area: z.string().min(1),
   image: z.string().url().optional(),
+  address: z.string().min(2).optional(),
 });
 
 export const updateIssueSchema = z.object({
@@ -28,6 +29,7 @@ export const updateIssueSchema = z.object({
   type: z.string().min(2).optional(),
   area: z.string().min(1).optional(),
   image: z.string().url().nullable().optional(),
+  address: z.string().min(2).optional(),
   // status must match enum: "Pending" | "InProgress" | "Completed"
   status: z.union([z.literal("Pending"), z.literal("InProgress"), z.literal("Completed")]).optional(),
 });

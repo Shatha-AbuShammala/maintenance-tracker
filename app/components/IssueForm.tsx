@@ -12,7 +12,7 @@ export type IssueFormValues = {
   description: string;
   type: string;
   area: string;
-  detailedAddress?: string;
+  address?: string;
   image?: string;
 };
 
@@ -51,7 +51,7 @@ export default function IssueForm({
     onSuccessRedirect !== undefined
       ? onSuccessRedirect
       : resolvedMode === "create"
-      ? "/"
+      ? "/my-issues"
       : null;
 
   const {
@@ -65,7 +65,7 @@ export default function IssueForm({
       description: initialValues?.description ?? "",
       type: initialValues?.type ?? "",
       area: initialValues?.area ?? "",
-      detailedAddress: initialValues?.detailedAddress ?? "",
+      address: initialValues?.address ?? "",
       image: initialValues?.image ?? "",
     },
   });
@@ -93,7 +93,7 @@ export default function IssueForm({
         reset();
       }
       if (redirectTarget) {
-        router.push(redirectTarget);
+        router.replace(redirectTarget);
       }
       onSuccess?.();
     },
@@ -108,16 +108,7 @@ export default function IssueForm({
 
   const onSubmit = (data: IssueFormValues) => {
     if (!isDirty) return;
-    const { detailedAddress, ...rest } = data;
-    const descriptionWithAddress =
-      detailedAddress && detailedAddress.trim()
-        ? `${rest.description}\n\nAddress: ${detailedAddress.trim()}`
-        : rest.description;
-
-    mutation.mutate({
-      ...rest,
-      description: descriptionWithAddress,
-    });
+    mutation.mutate(data);
   };
 
   return (
@@ -195,15 +186,18 @@ export default function IssueForm({
           </div>
 
           <div>
-            <label htmlFor="detailedAddress" className="block text-base font-semibold text-slate-800 mb-2">
-              Detailed address
+            <label htmlFor="address" className="block text-base font-semibold text-slate-800 mb-2">
+              Address
             </label>
+
             <textarea
-              id="detailedAddress"
+              id="address"
               rows={2}
-              {...register("detailedAddress")}
+              {...register("address", {
+                setValueAs: (value) => value?.trim() || "",
+              })}
               className="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 text-base px-4 py-3 transition hover:border-slate-300"
-              placeholder="Street name, nearby landmarks, building number…"
+              placeholder="Street name, nearby landmarks, building number"
             />
           </div>
         </div>
@@ -240,7 +234,7 @@ export default function IssueForm({
             <button
               type="button"
               onClick={onCancel}
-              className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 cursor-pointer"
             >
               {cancelLabel ?? "Cancel"}
             </button>
@@ -248,7 +242,7 @@ export default function IssueForm({
           <button
             type="submit"
             disabled={!isDirty || mutation.isPending}
-            className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-blue-700 via-indigo-600 to-fuchsia-600 px-6 py-3 text-base font-semibold text-white shadow-[0_16px_45px_-18px_rgba(59,130,246,0.65)] hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-16px_rgba(99,102,241,0.55)] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-blue-700 via-indigo-600 to-fuchsia-600 px-6 py-3 text-base font-semibold text-white shadow-[0_16px_45px_-18px_rgba(59,130,246,0.65)] hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-16px_rgba(99,102,241,0.55)] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           >
             {mutation.isPending ? (
               <span className="flex items-center gap-2">

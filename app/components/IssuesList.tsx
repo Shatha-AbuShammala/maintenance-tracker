@@ -84,7 +84,7 @@ export default function IssuesList({ items, meta, onPageChange }: IssuesListProp
             type="button"
             onClick={() => onPageChange(Math.max(1, meta.page - 1))}
             disabled={meta.page <= 1}
-            className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           >
             Previous
           </button>
@@ -95,7 +95,7 @@ export default function IssuesList({ items, meta, onPageChange }: IssuesListProp
             type="button"
             onClick={() => onPageChange(Math.min(totalPages, meta.page + 1))}
             disabled={meta.page >= totalPages}
-            className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           >
             Next
           </button>

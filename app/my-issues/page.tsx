@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Layout from "@/app/components/Layout";
@@ -15,6 +15,7 @@ type IssueListItem = {
   description: string;
   type: string;
   area: string;
+  address?: string;
   image?: string;
   status: IssueStatus;
   createdAt?: string;
@@ -103,7 +104,16 @@ export default function MyIssuesPage() {
       description: issueBeingEdited.description,
       type: issueBeingEdited.type,
       area: issueBeingEdited.area,
+      address: issueBeingEdited.address,
       image: issueBeingEdited.image,
+    };
+  }, [issueBeingEdited]);
+
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = issueBeingEdited ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = originalOverflow || "auto";
     };
   }, [issueBeingEdited]);
 
@@ -127,7 +137,7 @@ export default function MyIssuesPage() {
       <p className="mt-2 text-base text-slate-600">Nothing here yet - add your first report to get started.</p>
       <Link
         href="/issues/new"
-        className="mt-6 inline-flex items-center rounded-lg bg-gradient-to-r from-blue-700 via-indigo-600 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_-18px_rgba(59,130,246,0.45)]"
+        className="mt-6 inline-flex items-center rounded-lg bg-gradient-to-r from-blue-700 via-indigo-600 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_-18px_rgba(59,130,246,0.45)] cursor-pointer"
       >
         + Add Issue
       </Link>
@@ -150,7 +160,7 @@ export default function MyIssuesPage() {
             {issues.length > 0 && (
               <Link
                 href="/issues/new"
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-400/30 transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_-18px_rgba(59,130,246,0.35)]"
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-400/30 transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_-18px_rgba(59,130,246,0.35)] cursor-pointer"
               >
                 + Add Issue
               </Link>
@@ -251,7 +261,7 @@ export default function MyIssuesPage() {
                     <div className="flex flex-wrap gap-2">
                       <Link
                         href={`/issues/${issue._id}`}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-sky-100 bg-sky-50 px-3.5 py-2 text-sm font-semibold text-sky-800 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-100"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-sky-100 bg-sky-50 px-3.5 py-2 text-sm font-semibold text-sky-800 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-100 cursor-pointer"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
                           <path d="M10 3c-4.5 0-8 4.5-8 7s3.5 7 8 7 8-4.5 8-7-3.5-7-8-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
@@ -260,7 +270,7 @@ export default function MyIssuesPage() {
                       </Link>
                       <button
                         onClick={() => setIssueBeingEdited(issue)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500 bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-18px_rgba(37,99,235,0.45)]"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500 bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-18px_rgba(37,99,235,0.45)] cursor-pointer"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
                           <path d="M13.586 2a2 2 0 0 1 1.414.586l2.414 2.414a2 2 0 0 1 0 2.828l-7.95 7.95a2 2 0 0 1-1.002.543l-4.1.82a.5.5 0 0 1-.588-.588l.82-4.1a2 2 0 0 1 .543-1.002l7.95-7.95A2 2 0 0 1 13.586 2Zm-1.172 3.414-6.364 6.364-.47 2.35 2.35-.47 6.364-6.364-1.88-1.88Z" />
@@ -281,7 +291,7 @@ export default function MyIssuesPage() {
                     <button
                       onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                       disabled={page <= 1}
-                      className="px-3 py-1 rounded-md border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="px-3 py-1 rounded-md border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                     >
                       Previous
                     </button>
@@ -291,7 +301,7 @@ export default function MyIssuesPage() {
                     <button
                       onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                       disabled={page >= totalPages}
-                      className="px-3 py-1 rounded-md border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="px-3 py-1 rounded-md border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                     >
                       Next
                     </button>
@@ -302,38 +312,41 @@ export default function MyIssuesPage() {
           )}
 
           {issueBeingEdited && selectedInitialValues && (
-            <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 px-4 py-12 backdrop-blur-sm">
-              <div className="relative w-full max-w-3xl rounded-2xl border border-blue-100 bg-white/98 shadow-[0_32px_120px_-50px_rgba(15,23,42,0.45)]">
-                <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-                  <div>
-                    <h2 className="text-lg font-semibold text-slate-900">Edit Issue</h2>
-                    <p className="text-xs text-slate-500">Only your own issues can be edited.</p>
+            <>
+              <div className="fixed inset-0 bg-black/40 z-40" />
+              <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-12">
+                <div className="w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-slate-900">Edit Issue</h2>
+                      <p className="text-xs text-slate-500">Only your own issues can be edited.</p>
+                    </div>
+                    <button
+                      onClick={() => setIssueBeingEdited(null)}
+                      className="text-sm font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
+                      aria-label="Close edit modal"
+                    >
+                      X
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setIssueBeingEdited(null)}
-                    className="text-sm font-semibold text-slate-500 hover:text-slate-700"
-                    aria-label="Close edit modal"
-                  >
-                    X
-                  </button>
-                </div>
-                <div className="px-6 py-5">
-                  <IssueForm
-                    issueId={issueBeingEdited._id}
-                    mode="edit"
-                    initialValues={selectedInitialValues}
-                    submitLabel="Save Changes"
-                    cancelLabel="Cancel"
-                    onCancel={() => setIssueBeingEdited(null)}
-                    onSuccessRedirect={null}
-                    onSuccess={() => {
-                      setIssueBeingEdited(null);
-                      issuesQuery.refetch();
-                    }}
-                  />
+                  <div className="pt-4">
+                    <IssueForm
+                      issueId={issueBeingEdited._id}
+                      mode="edit"
+                      initialValues={selectedInitialValues}
+                      submitLabel="Save Changes"
+                      cancelLabel="Cancel"
+                      onCancel={() => setIssueBeingEdited(null)}
+                      onSuccessRedirect={null}
+                      onSuccess={() => {
+                        setIssueBeingEdited(null);
+                        issuesQuery.refetch();
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </main>

@@ -89,7 +89,7 @@ export default function AdminUsersPage() {
       <main className="min-h-screen bg-[#F5F7FB]">
         <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
           <nav className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
-            <Link href="/admin" className="hover:text-slate-600">
+            <Link href="/admin" className="hover:text-slate-600 cursor-pointer">
               Admin
             </Link>{" "}
             <span className="text-slate-500">›</span> <span className="text-slate-700">Users</span>
@@ -126,7 +126,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                         disabled={page <= 1}
-                        className="px-3 py-1 rounded-md border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="px-3 py-1 rounded-md border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                       >
                         Previous
                       </button>
@@ -136,7 +136,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => setPage((prev) => Math.min(usersQuery.data!.meta.pages, prev + 1))}
                         disabled={page >= usersQuery.data.meta.pages}
-                        className="px-3 py-1 rounded-md border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="px-3 py-1 rounded-md border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                       >
                         Next
                       </button>

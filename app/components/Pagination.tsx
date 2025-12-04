@@ -44,7 +44,7 @@ export default function Pagination({
         type="button"
         onClick={createHandler(currentPage - 1)}
         disabled={currentPage === 1}
-        className="rounded-md border px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-md border px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
       >
         Previous
       </button>
@@ -56,7 +56,7 @@ export default function Pagination({
             type="button"
             onClick={createHandler(page)}
             aria-current={page === currentPage ? "page" : undefined}
-            className={`rounded-md border px-3 py-1 text-xs font-medium ${
+            className={`rounded-md border px-3 py-1 text-xs font-medium cursor-pointer ${
               page === currentPage
                 ? "bg-blue-600 text-white border-blue-600"
                 : "text-gray-700 hover:bg-gray-50"
@@ -71,11 +71,10 @@ export default function Pagination({
         type="button"
         onClick={createHandler(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="rounded-md border px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-md border px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
       >
         Next
       </button>
     </nav>
   );
 }
-

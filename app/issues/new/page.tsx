@@ -31,7 +31,7 @@ export default function NewIssuePage() {
             </div>
 
             <div className="flex-1 rounded-2xl border border-white/10 bg-white/95 p-8 text-slate-900 shadow-[0_30px_90px_-48px_rgba(0,0,0,0.6)] backdrop-blur">
-              <IssueForm onSuccessRedirect="/" submitLabel="Submit Issue" />
+              <IssueForm onSuccessRedirect="/my-issues" submitLabel="Submit Issue" />
             </div>
           </div>
         </div>

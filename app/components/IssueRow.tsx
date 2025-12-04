@@ -33,13 +33,13 @@ export default function IssueRow({ issue }: IssueRowProps) {
       <td className="px-4 py-3 text-sm font-medium text-gray-900">
         <Link
           href={`/issues/${issue._id}`}
-          className="hover:text-blue-600 focus:outline-none focus-visible:underline"
+          className="hover:text-blue-600 focus:outline-none focus-visible:underline cursor-pointer"
         >
           {issue.title}
         </Link>
         <p className="text-xs text-gray-500 line-clamp-1">{issue.description}</p>
       </td>
-      <td className="px-4 py-3 text-sm text-gray-700">{issue.area || "—"}</td>
+      <td className="px-4 py-3 text-sm text-gray-700">{issue.area || "N/A"}</td>
       <td className="px-4 py-3">
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClasses[issue.status]}`}
@@ -49,12 +49,12 @@ export default function IssueRow({ issue }: IssueRowProps) {
       </td>
       <td className="px-4 py-3 text-sm text-gray-700">{reporter}</td>
       <td className="px-4 py-3 text-sm text-gray-500">
-        {issue.createdAt ? new Date(issue.createdAt).toLocaleDateString() : "—"}
+        {issue.createdAt ? new Date(issue.createdAt).toLocaleDateString() : "N/A"}
       </td>
       <td className="px-4 py-3 text-sm">
         <Link
           href={`/issues/${issue._id}`}
-          className="text-blue-600 hover:text-blue-800 focus:outline-none focus-visible:underline"
+          className="text-blue-600 hover:text-blue-800 focus:outline-none focus-visible:underline cursor-pointer"
         >
           View
         </Link>
@@ -62,4 +62,3 @@ export default function IssueRow({ issue }: IssueRowProps) {
     </tr>
   );
 }
-

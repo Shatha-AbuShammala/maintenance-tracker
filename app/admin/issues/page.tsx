@@ -16,6 +16,7 @@ type Issue = {
   description: string;
   area: string;
   type: string;
+  address?: string;
   status: IssueStatus;
   createdBy?: { name?: string; email?: string };
   createdAt?: string;
@@ -186,7 +187,7 @@ function AdminFilterBar({ filters, onChange, onClear }: AdminFilterBarProps) {
             type="button"
             onClick={onClear}
             disabled={!hasActiveFilters}
-            className="w-full h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+            className="w-full h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto cursor-pointer"
           >
             Reset
           </button>
@@ -270,7 +271,7 @@ export default function AdminIssuesPage() {
                 <div className="mt-6 flex justify-center">
                   <Link
                     href="/issues/new"
-                    className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                    className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 cursor-pointer"
                   >
                     + Add Issue
                   </Link>
@@ -319,7 +320,7 @@ export default function AdminIssuesPage() {
                           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                             <Link
                               href={`/admin/issues/${issue._id}`}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm ring-1 ring-blue-500/40 transition hover:-translate-y-0.5 hover:bg-blue-700"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm ring-1 ring-blue-500/40 transition hover:-translate-y-0.5 hover:bg-blue-700 cursor-pointer"
                               aria-label="View issue"
                               title="View issue"
                             >
@@ -344,7 +345,7 @@ export default function AdminIssuesPage() {
                       <button
                         onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                         disabled={page <= 1}
-                        className="px-3 py-1 rounded-md border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="px-3 py-1 rounded-md border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                       >
                         Previous
                       </button>
@@ -354,7 +355,7 @@ export default function AdminIssuesPage() {
                       <button
                         onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                         disabled={page >= totalPages}
-                        className="px-3 py-1 rounded-md border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="px-3 py-1 rounded-md border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                       >
                         Next
                       </button>

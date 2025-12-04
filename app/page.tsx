@@ -51,7 +51,7 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
                 href="/auth/login"
-                className="rounded-full bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-300/20 transition hover:-translate-y-0.5 hover:shadow-xl"
+                className="rounded-full bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-300/20 transition hover:-translate-y-0.5 hover:shadow-xl cursor-pointer"
               >
                 Report an issue
               </Link>

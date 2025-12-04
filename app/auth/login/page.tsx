@@ -85,7 +85,7 @@ export default function LoginPage() {
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">Sign in</p>
                     <h2 className="text-2xl font-semibold text-slate-900">Access your account</h2>
                   </div>
-                  <Link href="/auth/register" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
+                  <Link href="/auth/register" className="text-sm font-semibold text-blue-700 hover:text-blue-800 cursor-pointer">
                     Create account
                   </Link>
                 </div>
@@ -126,7 +126,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loginMutation.isPending}
-                    className="w-full rounded-lg bg-gradient-to-r from-blue-700 via-indigo-600 to-fuchsia-600 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_22px_60px_-20px_rgba(59,130,246,0.65)] transition hover:-translate-y-0.5 hover:shadow-[0_28px_72px_-18px_rgba(129,140,248,0.55)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="w-full rounded-lg bg-gradient-to-r from-blue-700 via-indigo-600 to-fuchsia-600 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_22px_60px_-20px_rgba(59,130,246,0.65)] transition hover:-translate-y-0.5 hover:shadow-[0_28px_72px_-18px_rgba(129,140,248,0.55)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                   >
                     {loginMutation.isPending ? "Signing in..." : "Sign in"}
                   </button>

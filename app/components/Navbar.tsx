@@ -60,7 +60,7 @@ function NavLinks({
             key={link.href}
             href={link.href}
             onClick={(event) => onNavigate(event, link.href)}
-            className={`${baseClasses} ${stateClasses}`}
+            className={`${baseClasses} ${stateClasses} cursor-pointer`}
           >
             {link.label}
           </Link>
@@ -93,7 +93,7 @@ function UserActions({
             </span>
             <button
               onClick={onLogout}
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
             >
               Logout
             </button>
@@ -102,13 +102,13 @@ function UserActions({
           <>
             <Link
               href="/auth/login"
-              className="text-sm font-semibold text-slate-700 transition hover:text-slate-900"
+              className="text-sm font-semibold text-slate-700 transition hover:text-slate-900 cursor-pointer"
             >
               Login
             </Link>
             <Link
               href="/auth/register"
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:-translate-y-0.5 hover:bg-slate-800"
+              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:-translate-y-0.5 hover:bg-slate-800 cursor-pointer"
             >
               Register
             </Link>
@@ -123,29 +123,29 @@ function UserActions({
       {user ? (
         <div className="space-y-3">
           <p className="text-sm font-semibold text-slate-700">{user.name || user.email || "Account"}</p>
-          <button
-            onClick={onLogout}
-            className="w-full rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-          >
-            Logout
-          </button>
+            <button
+              onClick={onLogout}
+              className="w-full rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+            >
+              Logout
+            </button>
         </div>
       ) : (
         <div className="flex flex-col space-y-2">
-          <Link
-            href="/auth/login"
-            onClick={onNavigate}
-            className="w-full rounded-md border border-slate-200 px-4 py-2 text-center text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-          >
-            Login
-          </Link>
-          <Link
-            href="/auth/register"
-            onClick={onNavigate}
-            className="w-full rounded-md bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            Register
-          </Link>
+            <Link
+              href="/auth/login"
+              onClick={onNavigate}
+              className="w-full rounded-md border border-slate-200 px-4 py-2 text-center text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+            >
+              Login
+            </Link>
+            <Link
+              href="/auth/register"
+              onClick={onNavigate}
+              className="w-full rounded-md bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-slate-800 cursor-pointer"
+            >
+              Register
+            </Link>
         </div>
       )}
     </div>
@@ -209,7 +209,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           href="/"
-          className="flex items-center space-x-3"
+          className="flex items-center space-x-3 cursor-pointer"
           onClick={(event) => {
             event.preventDefault();
             setIsOpen(false);
@@ -230,7 +230,7 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-slate-600 hover:bg-slate-100 md:hidden"
+          className="inline-flex items-center justify-center rounded-md p-2 text-slate-600 hover:bg-slate-100 md:hidden cursor-pointer"
           aria-expanded={isOpen}
           onClick={() => setIsOpen((prev) => !prev)}
         >

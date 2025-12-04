@@ -100,7 +100,7 @@ export default function AdminIssueControls({ issueId, currentStatus }: AdminIssu
         type="button"
         onClick={() => handleStatusChange("InProgress")}
         disabled={statusMutation.isPending || currentStatus === "InProgress"}
-        className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3.5 py-2 text-xs font-semibold text-blue-700 shadow-sm ring-1 ring-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-100 hover:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3.5 py-2 text-xs font-semibold text-blue-700 shadow-sm ring-1 ring-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-100 hover:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
         aria-label="Mark in progress"
         title="Mark in progress"
       >
@@ -111,7 +111,7 @@ export default function AdminIssueControls({ issueId, currentStatus }: AdminIssu
         type="button"
         onClick={() => handleStatusChange("Completed")}
         disabled={statusMutation.isPending || currentStatus === "Completed"}
-        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-100 hover:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-100 hover:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
         aria-label="Mark completed"
         title="Mark completed"
       >
@@ -122,7 +122,7 @@ export default function AdminIssueControls({ issueId, currentStatus }: AdminIssu
         type="button"
         onClick={() => setConfirmDeleteOpen(true)}
         disabled={deleteMutation.isPending}
-        className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3.5 py-2 text-xs font-semibold text-red-700 shadow-sm ring-1 ring-red-200 transition hover:-translate-y-0.5 hover:bg-red-100 hover:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3.5 py-2 text-xs font-semibold text-red-700 shadow-sm ring-1 ring-red-200 transition hover:-translate-y-0.5 hover:bg-red-100 hover:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
         aria-label="Delete issue"
         title="Delete issue"
       >
@@ -134,7 +134,7 @@ export default function AdminIssueControls({ issueId, currentStatus }: AdminIssu
         ? createPortal(
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div
-                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm cursor-pointer"
                 onClick={() => setConfirmDeleteOpen(false)}
                 aria-hidden="true"
               />
@@ -147,7 +147,7 @@ export default function AdminIssueControls({ issueId, currentStatus }: AdminIssu
                   <button
                     type="button"
                     onClick={() => setConfirmDeleteOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800"
+                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -155,7 +155,7 @@ export default function AdminIssueControls({ issueId, currentStatus }: AdminIssu
                     type="button"
                     onClick={() => deleteMutation.mutate()}
                     disabled={deleteMutation.isPending}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-60"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-60 cursor-pointer"
                   >
                     {deleteMutation.isPending ? "Deleting..." : "Delete"}
                   </button>
