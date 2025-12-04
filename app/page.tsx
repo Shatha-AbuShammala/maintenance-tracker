@@ -26,7 +26,8 @@ export default function Home() {
 
   useEffect(() => {
     if (user) {
-      router.replace("/my-issues");
+      const target = user.role === "admin" ? "/admin" : "/my-issues";
+      router.replace(target);
     }
   }, [user, router]);
 

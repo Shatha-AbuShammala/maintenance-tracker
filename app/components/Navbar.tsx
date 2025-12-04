@@ -157,12 +157,13 @@ export default function Navbar() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const isAdminSection = pathname?.startsWith("/admin");
   const authProtectedPaths = ["/issues/new", "/my-issues"];
-  const navLinks = !user
-    ? VISITOR_LINKS
-    : user.role === "admin"
-      ? ADMIN_LINKS
-      : CITIZEN_LINKS;
+  const navLinks = (() => {
+    if (isAdminSection || user?.role === "admin") return ADMIN_LINKS;
+    if (!user) return VISITOR_LINKS;
+    return CITIZEN_LINKS;
+  })();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";

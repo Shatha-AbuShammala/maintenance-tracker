@@ -46,7 +46,8 @@ export default function LoginPage() {
       });
       setToken(data.token);
       toast.success("Login successful!");
-      router.push("/");
+      const target = data.user.role === "admin" ? "/admin" : "/my-issues";
+      router.push(target);
     },
     onError: (error: unknown) => {
       let errorMessage = "Login failed. Please check your credentials.";

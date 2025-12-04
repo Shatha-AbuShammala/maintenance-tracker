@@ -15,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Provider>
           {children}
           <ToastProvider />
+          <div id="modal-root" />
         </Provider>
       </body>
     </html>

@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import Layout from "@/app/components/Layout";
 import LoadingSkeleton from "@/app/components/LoadingSkeleton";
-import IssueForm, { IssueFormValues } from "@/app/components/IssueForm";
 import { useApiFetcher, useAuth } from "@/app/providers/Providers";
 import { IssueStatus } from "@/models/Issue";
 
@@ -40,7 +39,6 @@ export default function IssueDetailPage() {
   const router = useRouter();
   const api = useApiFetcher();
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
 
   const issueQuery = useQuery({
     queryKey: ["issue", id],
@@ -61,7 +59,6 @@ export default function IssueDetailPage() {
 
   const issue = issueQuery.data;
   const isAdmin = user?.role === "admin";
-  const isReporter = issue && issue.createdBy?._id === user?.id;
   const history = useMemo(() => {
     if (!issue) return [];
     const events: { label: string; detail: string }[] = [];
@@ -99,44 +96,6 @@ export default function IssueDetailPage() {
       toast.error(error instanceof Error ? error.message : "Failed to update status");
     },
   });
-
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const response = await api<ApiResponse<{ message: string }>>({
-        url: `/issues/${id}`,
-        method: "DELETE",
-      });
-      if (!response.success) {
-        throw new Error(response.error || "Failed to delete issue");
-      }
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success("Issue deleted");
-      router.push("/");
-    },
-    onError: (error: unknown) => {
-      toast.error(error instanceof Error ? error.message : "Failed to delete issue");
-    },
-  });
-
-  const handleDelete = () => {
-    if (!isAdmin || !issue) return;
-    if (window.confirm("Are you sure you want to delete this issue?")) {
-      deleteMutation.mutate();
-    }
-  };
-
-  const formInitialValues: IssueFormValues | undefined = useMemo(() => {
-    if (!issue) return undefined;
-    return {
-      title: issue.title,
-      description: issue.description,
-      type: issue.type,
-      area: issue.area,
-      image: issue.image,
-    };
-  }, [issue]);
 
   if (issueQuery.isLoading) {
     return (
@@ -187,25 +146,7 @@ export default function IssueDetailPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              {isReporter && (
-                <button
-                  onClick={() => setIsEditing((prev) => !prev)}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm"
-                >
-                  {isEditing ? "Cancel Edit" : "Edit Issue"}
-                </button>
-              )}
-              {isAdmin && (
-                <button
-                  onClick={handleDelete}
-                  disabled={deleteMutation.isPending}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-md shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {deleteMutation.isPending ? "Deleting..." : "Delete"}
-                </button>
-              )}
-            </div>
+            <div className="flex flex-wrap gap-3" />
           </div>
 
           {issue.image && (
@@ -246,22 +187,6 @@ export default function IssueDetailPage() {
                 </div>
               </section>
 
-              {isEditing && formInitialValues && (
-                <section className="rounded-2xl border border-blue-100 bg-blue-50 p-6 shadow-sm">
-                  <h2 className="text-lg font-semibold text-blue-900 mb-4">Edit Issue</h2>
-                  <IssueForm
-                    initialValues={formInitialValues}
-                    issueId={issue._id}
-                    mode="edit"
-                    submitLabel="Save Changes"
-                    onSuccess={() => {
-                      setIsEditing(false);
-                      issueQuery.refetch();
-                    }}
-                    onSuccessRedirect={null}
-                  />
-                </section>
-              )}
             </div>
 
             <aside className="space-y-6">

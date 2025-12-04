@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { CheckCircle2, PlayCircle, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useApiFetcher } from "@/app/providers/Providers";
@@ -21,6 +23,21 @@ export default function AdminIssueControls({ issueId, currentStatus }: AdminIssu
   const api = useApiFetcher();
   const queryClient = useQueryClient();
   const [isConfirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [modalRoot, setModalRoot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const root = document.getElementById("modal-root");
+    setModalRoot(root);
+  }, []);
+
+  useEffect(() => {
+    if (!isConfirmDeleteOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [isConfirmDeleteOpen]);
 
   const invalidateIssues = () => {
     queryClient.invalidateQueries({ queryKey: ["issues"] });
@@ -78,61 +95,76 @@ export default function AdminIssueControls({ issueId, currentStatus }: AdminIssu
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex items-center gap-2">
       <button
         type="button"
         onClick={() => handleStatusChange("InProgress")}
         disabled={statusMutation.isPending || currentStatus === "InProgress"}
-        className="px-3 py-1.5 text-xs font-semibold rounded-md border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3.5 py-2 text-xs font-semibold text-blue-700 shadow-sm ring-1 ring-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-100 hover:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label="Mark in progress"
+        title="Mark in progress"
       >
-        Mark In Progress
+        <PlayCircle className="h-4 w-4" />
+        In Progress
       </button>
       <button
         type="button"
         onClick={() => handleStatusChange("Completed")}
         disabled={statusMutation.isPending || currentStatus === "Completed"}
-        className="px-3 py-1.5 text-xs font-semibold rounded-md border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-100 hover:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label="Mark completed"
+        title="Mark completed"
       >
-        Mark Completed
+        <CheckCircle2 className="h-4 w-4" />
+        Completed
       </button>
       <button
         type="button"
         onClick={() => setConfirmDeleteOpen(true)}
         disabled={deleteMutation.isPending}
-        className="px-3 py-1.5 text-xs font-semibold rounded-md border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3.5 py-2 text-xs font-semibold text-red-700 shadow-sm ring-1 ring-red-200 transition hover:-translate-y-0.5 hover:bg-red-100 hover:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label="Delete issue"
+        title="Delete issue"
       >
+        <Trash2 className="h-4 w-4" />
         Delete
       </button>
 
-      {isConfirmDeleteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Issue</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Are you sure you want to delete this issue? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
+      {isConfirmDeleteOpen && modalRoot
+        ? createPortal(
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+              <div
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
                 onClick={() => setConfirmDeleteOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => deleteMutation.mutate()}
-                disabled={deleteMutation.isPending}
-                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-60"
-              >
-                {deleteMutation.isPending ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                aria-hidden="true"
+              />
+              <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-200 animate-[fadeIn_140ms_ease,zoomIn_140ms_ease]">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Issue</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Are you sure you want to delete this issue? This action cannot be undone.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteMutation.mutate()}
+                    disabled={deleteMutation.isPending}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-60"
+                  >
+                    {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </div>,
+            modalRoot
+          )
+        : null}
     </div>
   );
 }
-
-
