@@ -1,5 +1,6 @@
 "use client";
 
+import { ChangeEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -59,6 +60,8 @@ export default function IssueForm({
     handleSubmit,
     formState: { errors, isDirty },
     reset,
+    setValue,
+    watch,
   } = useForm<IssueFormValues>({
     defaultValues: {
       title: initialValues?.title ?? "",
@@ -69,6 +72,10 @@ export default function IssueForm({
       image: initialValues?.image ?? "",
     },
   });
+
+  const imageValue = watch("image");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: async (data: IssueFormValues) => {
@@ -106,9 +113,50 @@ export default function IssueForm({
     },
   });
 
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api<ApiResponse<{ url: string }>>({
+        url: "/uploads",
+        method: "POST",
+        data: formData,
+      });
+
+      if (!response.success || !response.data?.url) {
+        throw new Error(response.error || "Failed to upload image");
+      }
+
+      setValue("image", response.data.url, { shouldDirty: true, shouldValidate: true });
+      toast.success("Image uploaded");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to upload image";
+      setUploadError(message);
+      toast.error(message);
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleClearImage = () => {
+    setValue("image", "", { shouldDirty: true, shouldValidate: true });
+    setUploadError(null);
+  };
+
   const onSubmit = (data: IssueFormValues) => {
     if (!isDirty) return;
-    mutation.mutate(data);
+    const normalized: IssueFormValues = {
+      ...data,
+      address: data.address?.trim() || undefined,
+      image: data.image?.trim() || undefined,
+    };
+    mutation.mutate(normalized);
   };
 
   return (
@@ -202,23 +250,45 @@ export default function IssueForm({
           </div>
         </div>
 
-        <div>
-          <label htmlFor="image" className="block text-base font-semibold text-slate-800 mb-2">
-            Image URL (optional)
-          </label>
-          <input
-            id="image"
-            type="url"
-            {...register("image", {
-              pattern: {
-                value: /^(https?:\/\/)/i,
-                message: "Please enter a valid URL",
-              },
-            })}
-            className="w-full rounded-md border border-slate-200 bg-white text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-500 text-base px-4 py-3"
-            placeholder="Paste an image link (optional)"
-          />
-          {errors.image && <p className="text-xs text-red-500 mt-1">{errors.image.message}</p>}
+        <div className="space-y-3">
+          <div>
+            <label htmlFor="imageUpload" className="block text-base font-semibold text-slate-800 mb-2">
+              Upload image (optional)
+            </label>
+            <input
+              id="imageUpload"
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploading}
+              className="block w-full rounded-md border border-slate-200 bg-white text-slate-900 shadow-sm text-base px-4 py-3 cursor-pointer disabled:cursor-not-allowed"
+            />
+            {uploading && <p className="text-xs text-slate-500 mt-1">Uploading...</p>}
+            {uploadError && <p className="text-xs text-red-500 mt-1">{uploadError}</p>}
+          </div>
+          {imageValue && (
+            <div className="mt-3 space-y-2">
+              <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                <img
+                  src={imageValue}
+                  alt="Selected issue image"
+                  className="w-full max-w-full max-h-64 object-contain"
+                />
+              </div>
+              <p className="text-xs text-green-700">
+                Image ready:{" "}
+                <a href={imageValue} target="_blank" rel="noreferrer" className="underline">
+                </a>
+                <button
+                  type="button"
+                  onClick={handleClearImage}
+                  className="ml-3 text-blue-700 underline"
+                >
+                  Remove
+                </button>
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

@@ -19,8 +19,16 @@ export const createIssueSchema = z.object({
   description: z.string().min(6),
   type: z.string().min(2),
   area: z.string().min(1),
-  image: z.string().url().optional(),
-  address: z.string().min(2).optional(),
+  image: z
+    .string()
+    .transform((val) => val?.trim?.() || undefined)
+    .optional()
+    .refine((val) => !val || /^https?:\/\//i.test(val), { message: "Invalid image URL" }),
+  address: z
+    .string()
+    .transform((val) => val?.trim?.() || undefined)
+    .optional()
+    .refine((val) => !val || val.length >= 2, { message: "Address must be at least 2 characters" }),
 });
 
 export const updateIssueSchema = z.object({
@@ -28,8 +36,16 @@ export const updateIssueSchema = z.object({
   description: z.string().min(6).optional(),
   type: z.string().min(2).optional(),
   area: z.string().min(1).optional(),
-  image: z.string().url().nullable().optional(),
-  address: z.string().min(2).optional(),
+  image: z
+    .string()
+    .transform((val) => val?.trim?.() || undefined)
+    .optional()
+    .refine((val) => !val || /^https?:\/\//i.test(val), { message: "Invalid image URL" }),
+  address: z
+    .string()
+    .transform((val) => val?.trim?.() || undefined)
+    .optional()
+    .refine((val) => !val || val.length >= 2, { message: "Address must be at least 2 characters" }),
   // status must match enum: "Pending" | "InProgress" | "Completed"
   status: z.union([z.literal("Pending"), z.literal("InProgress"), z.literal("Completed")]).optional(),
 });
